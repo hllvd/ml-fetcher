@@ -13,7 +13,7 @@ import {
 import { calculateDaysFrom } from "../../utils/day-calculation.util"
 import { roundNumber } from "../../utils/math.util"
 import { convertCatalogIdToProductId } from "../../utils/ml.utils"
-import { fetchProduct, fetchProducts } from "./api/products.api.service"
+import { fetchProducts } from "./api/products.api.service"
 import { fetchSeller } from "./api/users"
 import { productIdsReducer } from "./reducers/product-urls.reducer.service"
 import { webScrapeProductPriceAndQuantitySoldAndHasVideoPredicate } from "./scraper/predicate/product/product-metadata.predicate.service"
@@ -59,7 +59,6 @@ const getFullProducts = async ({
         "supermarket_eligible"
       )
 
-      const categoryId = product?.category_id ?? null
       let category = null
 
       return {
@@ -79,39 +78,8 @@ const getFullProduct = async ({
   userId,
   productId,
 }: FetchProductArgument): Promise<ProductApiResponse> => {
-  const productIdWIthDash = convertCatalogIdToProductId(productId)
-  const product = await fetchProduct({ userId, productId })
-  const sellerId = product?.seller_id?.toString()
-
-  const [user, scrapProductPage] = await Promise.all([
-    fetchSeller({ sellerId, userId }),
-    _webScrapeProductMetadata(productIdWIthDash),
-  ])
-
-  const extraFields = _getProductExtraFields({
-    product,
-    currentPrice: scrapProductPage?.currentPrice,
-    quantitySold: scrapProductPage?.quantitySold,
-  })
-
-  const ean = _getEanFromProductObj(product)
-  extraFields.ean = ean
-  extraFields.has_video = scrapProductPage.hasVideo
-  extraFields.picture_count = product.pictures.length
-  extraFields.supermarket_eligible = product.tags.includes(
-    "supermarket_eligible"
-  )
-
-  const categoryId = product?.category_id ?? null
-  let category = null
-
-  return {
-    category,
-    productId,
-    ...product,
-    user,
-    ...extraFields,
-  }
+  const products = await getFullProducts({ userId, productIds: [productId] })
+  return products[0]
 }
 
 const _getEanFromProductObj = (product: MLProduct): string | null => {

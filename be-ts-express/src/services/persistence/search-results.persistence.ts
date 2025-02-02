@@ -17,6 +17,7 @@ import { truncateString } from "../../utils/str.util"
 const saveSearchResultToDb = async (
   searchResultsInfo: SearchResultApiResponse
 ) => {
+  console.log("saveSearchResultToDb")
   const {
     searchTerm = null,
     items = null,
@@ -40,13 +41,14 @@ const saveSearchResultToDb = async (
   )
 
   await productsCatalogsRepository.upsert(productsCatalogs)
-
+  console.log("saved products from search")
   // Save Search
   const search = new Search()
   search.searchTerm = searchTerm
   search.url = url
   await searchRepository.upsert(search)
   const searchRecord = await searchRepository.get(search.searchTerm)
+  console.log("saved search")
 
   // Map and save SearchPosition
   const searchPosition = items.map(({ id, isProduct, index }) => {
@@ -81,6 +83,7 @@ const saveSearchResultToDb = async (
   })
 
   await jobsRepository.save(jobs)
+  console.log("saved jobs")
 }
 
 export { saveSearchResultToDb }

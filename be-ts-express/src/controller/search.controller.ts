@@ -18,6 +18,7 @@ const items = async (
     searchTerm,
     userId,
   })
+
   req.persistency = {} as PersistencyInfo
   req.persistency.searchResultsInfo = { ...categoryItems }
   next()

@@ -86,7 +86,7 @@ const fetchWithRetry = async <T>({
       areTherePages = false
     }
   }
-  return { result, pages } ?? null
+  return { result, pages }
 }
 const webScrapeFetcherDynamic = async (url: string, retries: number) => {
   let counter = 0

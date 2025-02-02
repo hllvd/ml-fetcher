@@ -42,16 +42,18 @@ const list = async (
     jobStatus = JobsStatus.Pending,
   } = filter
 
-  let options: FindManyOptions<Jobs> = {}
+  let options: FindManyOptions<Jobs> = {
+    where: { ttl: MoreThan(0), jobStatus: 0 },
+  }
 
-  if (productType) {
-    options = { where: { product: { type: productType } } }
+  if (productType !== null) {
+    options = { where: { ...options?.where, product: { type: productType } } }
   }
 
   if (jobPriority) {
     options = {
       ...options,
-      where: { ...options?.where, jobPriority: jobPriority },
+      where: { ...options?.where, jobPriority: jobPriority, ttl: MoreThan(0) },
     }
   }
 
@@ -72,6 +74,7 @@ const list = async (
     take: limit + 1,
     skip: 0,
   }
+
   const jobs = await dataSource
     .getRepository(Jobs)
     .find({ ...defaultOptions, ...options })

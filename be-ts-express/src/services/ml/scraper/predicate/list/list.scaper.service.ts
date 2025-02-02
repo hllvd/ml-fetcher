@@ -18,10 +18,11 @@ const webScrapeSearchResultMetadata = async (
   var gridResultItems = document.querySelectorAll(
     ".ui-search-layout li.ui-search-layout__item"
   )
+  console.log("gridResultItems", gridResultItems)
 
   const linkPriceAndId = Array.from(gridResultItems).map(
     (el: HTMLSelectElement, i: number) => {
-      const currentEl = el.querySelector("h2 a")
+      const currentEl = el.querySelector("h2 a") || el.querySelector("h3 a")
       if (currentEl == null) return null
 
       const link = minimalPathUrl(currentEl.getAttribute("href"))
@@ -42,8 +43,9 @@ const webScrapeSearchResultMetadata = async (
       return { link, isProduct, price: convertCurrencyStrings(price) }
     }
   )
-
+  console.log("linkPriceAndId", linkPriceAndId.length)
   const linkPriceAndIdFiltered = linkPriceAndId.filter((e) => e !== null)
+  console.log("linkPriceAndIdFiltered", linkPriceAndIdFiltered.length)
   let i = 1
   const linkPriceAndIdFilteredWithIdAndIndex = linkPriceAndIdFiltered.map(
     (e) => {
@@ -53,10 +55,16 @@ const webScrapeSearchResultMetadata = async (
       return { ...e, id, index }
     }
   )
+  console.log(
+    "linkPriceAndIdFilteredWithIdAndIndex",
+    linkPriceAndIdFilteredWithIdAndIndex.length
+  )
 
   const nextPage = document.querySelector(
     "li.andes-pagination__button.andes-pagination__button--next a"
   )?.href
+
+  console.log("nextPage", nextPage)
 
   if (linkPriceAndId.length === 0) throw new Error("Page not found")
 

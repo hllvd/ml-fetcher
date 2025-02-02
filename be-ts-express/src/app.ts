@@ -17,7 +17,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 // Get Entity From DB
-//app.use(entityFromDbMiddleware)
+app.use(entityFromDbMiddleware)
 
 // Routes
 app.use("/", routes)
@@ -35,29 +35,33 @@ app.use((err, req, res, next) => {
 const workerManager = new WorkerManagerService()
 
 // Start workers
-workerManager.startWorker({
-  id: "emailWorker",
-  jobServiceType: "email",
-  batchSize: 5,
-  delay: 2000,
-  workerFunction: "exampleWorker",
-})
+
 workerManager.startWorker({
   id: "reportWorker",
-  jobServiceType: "report",
-  batchSize: 3,
+  jobServiceType: 0,
+  batchSize: 10,
   delay: 3000,
-  workerFunction: "exampleWorker",
+  workerFunction: "fetchProductsToDbWorker",
+  stopOnFail: false,
+})
+
+workerManager.startWorker({
+  id: "reportWorker2",
+  jobServiceType: 1,
+  batchSize: 1,
+  delay: 1000,
+  workerFunction: "fetchCatalogToDbWorker",
+  stopOnFail: false,
 })
 
 // List active workers
-console.log("Active workers:", workerManager.getWorkerIds())
+//console.log("Active workers:", workerManager.getWorkerIds())
 
 // Stop all workers after 10 seconds
-setTimeout(() => {
-  workerManager.stopAllWorkers()
-  console.log("All workers stopped.")
-}, 15000)
+// setTimeout(() => {
+//   workerManager.stopAllWorkers()
+//   console.log("All workers stopped.")
+// }, 100000)
 
 // Start the server
 app.listen(port, async () => {

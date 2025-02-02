@@ -1,4 +1,5 @@
 import { NextFunction, Response } from "express"
+import { MY_USER_ID } from "../../constants"
 import { catalogInfoToCatalogFieldsEntityConverter } from "../../converters/ml.convert"
 import dataSource from "../../db/data-source"
 import { BrandModel } from "../../entities/sql/brand-model.entity"
@@ -13,6 +14,7 @@ import { Seller } from "../../entities/sql/seller.entity"
 import { StateFields } from "../../entities/sql/state-fields.entity"
 import { ProductViewsSummary } from "../../entities/sql/views-summary.entity"
 import { EntityType } from "../../enums/entity-type.enum"
+import { JobServiceType } from "../../enums/jobs-service-type.enum"
 import { JobsStatus } from "../../enums/jobs-status.enum"
 import { JobsType } from "../../enums/jobs-type.enum"
 import {
@@ -25,8 +27,42 @@ import jobsRepository from "../../repository/jobs.repository"
 import productsCatalogsRepository from "../../repository/products-catalogs.repository"
 import searchRepository from "../../repository/search.repository"
 import { JobsService } from "../../services/jobs/jobs.service"
+import {
+  getFullProduct,
+  getFullProducts,
+} from "../../services/ml/products.service"
+import { fetchCatalogToDbWorker } from "../../worker/workers-functions/fetch-catalogs-to-db.worker"
+import { fetchProductsToDbWorker } from "../../worker/workers-functions/fetch-products-to-db.worker"
 
 const items = async (
+  req: RequestExtended,
+  res: Response,
+  next: NextFunction
+) => {
+  const jobsService = new JobsService()
+  const productIds = ["MLB3872656679", "MLB3324266469", "MLB332426646444"]
+  const products = await getFullProducts({ userId: MY_USER_ID, productIds })
+  res.status(200).json({ message: "items", ...products })
+}
+
+const items_getFullproducts = async (
+  req: RequestExtended,
+  res: Response,
+  next: NextFunction
+) => {
+  const products = await getFullProducts({
+    userId: "1231084821",
+    productIds: ["MLB3828379003"],
+  })
+
+  const product = await getFullProduct({
+    userId: "1231084821",
+    productId: "MLB3828379003",
+  })
+
+  res.status(200).json({ ...product, message: "items" })
+}
+const items_jobService = async (
   req: RequestExtended,
   res: Response,
   next: NextFunction

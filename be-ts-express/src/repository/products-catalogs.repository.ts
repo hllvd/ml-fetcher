@@ -63,11 +63,16 @@ const get = async (productId): Promise<ProductsCatalogs> => {
 const upsert = async (
   catalogInfo: ProductsCatalogs | Array<ProductsCatalogs>
 ) => {
-  const catalogs = Array.isArray(catalogInfo) ? catalogInfo : [catalogInfo]
-  const catalogsResult = catalogs.map((catalog) => {
-    return upsertSingle(catalog)
-  })
-  return catalogsResult
+  try {
+    const catalogs = Array.isArray(catalogInfo) ? catalogInfo : [catalogInfo]
+    const catalogsResult = catalogs.map((catalog) => {
+      return upsertSingle(catalog)
+    })
+    return catalogsResult
+  } catch (error) {
+    console.error("Error in product.upsert operation:", error)
+    throw error
+  }
 }
 
 const upsertSingle = async (catalogInfo: ProductsCatalogs) => {

@@ -7,7 +7,7 @@ export interface MLProduct extends MLProductResponse {
   id: ProductId
   ean?: string
   site_id?: string
-  user?: MLUser
+  seller?: MLUser
   pictures?: any
   attributes?: any
   title?: string

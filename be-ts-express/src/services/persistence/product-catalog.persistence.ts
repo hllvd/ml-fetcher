@@ -32,14 +32,14 @@ export const saveProductToDb = async (productInfo: ProductApiResponse) => {
   const { brand, model, color } = getBrandModel(productInfo)
   product.brandModel = await brandModelFieldHandler({ brand, model, color })
 
-  const { user } = productInfo
+  const { seller: userInfo } = productInfo
   let seller = new Seller()
   const existingUser = await dataSource.manager
     .getRepository(Seller)
-    .findOne({ where: { id: user.id } })
+    .findOne({ where: { id: userInfo.id } })
 
   if (!existingUser) {
-    seller = convertMLUserFromApiResponseToSellerEntity(user)
+    seller = convertMLUserFromApiResponseToSellerEntity(userInfo)
     //await dataSource.manager.getRepository(Seller).save(seller)
   }
 
@@ -51,31 +51,34 @@ export const saveProductToDb = async (productInfo: ProductApiResponse) => {
 
 export const saveCatalogToDb = async (catalogInfo: CatalogApiResponse) => {
   console.log("saveCatalogToDb 1")
-  let catalog = new ProductsCatalogs()
-  catalog = convertCatalogApiResponseToProductCatalogEntity(
-    catalogInfo,
-    EntityType.Catalog
-  )
-  const { brand, model, color } = catalogInfo?.brandModel
-  catalog.brandModel = await brandModelFieldHandler({ brand, model, color })
-
-  const catalogFields = new CatalogFields()
-
-  const catalogFieldConverted = await catalogInfoToCatalogFieldsEntityConverter(
-    {
+  try {
+    let catalog = new ProductsCatalogs()
+    catalog = convertCatalogApiResponseToProductCatalogEntity(
       catalogInfo,
-      catalogFields,
-    }
-  )
-  const catalogStateFieldsConverted = await catalogStateFieldsConverter(
-    catalogInfo
-  )
+      EntityType.Catalog
+    )
+    const { brand, model, color } = catalogInfo?.brandModel
+    catalog.brandModel = await brandModelFieldHandler({ brand, model, color })
 
-  catalog.stateFields =
-    catalogStateFieldsConverted as unknown as Array<StateFields> /// TODO
-  console.log("catalogFieldConverted", catalogFieldConverted)
-  catalog.catalogFields = catalogFieldConverted
+    const catalogFields = new CatalogFields()
 
-  await productsCatalogsRepository.upsert(catalog)
-  console.log("save saveCatalogToDb to db")
+    const catalogFieldConverted =
+      await catalogInfoToCatalogFieldsEntityConverter({
+        catalogInfo,
+        catalogFields,
+      })
+    const catalogStateFieldsConverted = await catalogStateFieldsConverter(
+      catalogInfo
+    )
+
+    catalog.stateFields =
+      catalogStateFieldsConverted as unknown as Array<StateFields> /// TODO
+    console.log("catalogFieldConverted", catalogFieldConverted)
+    catalog.catalogFields = catalogFieldConverted
+
+    await productsCatalogsRepository.upsert(catalog)
+    console.log("save saveCatalogToDb to db")
+  } catch (e) {
+    console.log("error saveCatalogToDb to db")
+  }
 }
