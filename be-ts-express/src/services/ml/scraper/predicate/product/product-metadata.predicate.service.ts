@@ -2,7 +2,7 @@ import { AxiosResponse } from "axios"
 import { JSDOM } from "jsdom"
 import { sanitizeAmountSold } from "../../../../../utils/ml.utils"
 
-const webScrapeProductPriceAndQuantitySoldAndHasVideoPredicate = async (
+const webScrapProductMetadata = async (
   response: AxiosResponse
 ): Promise<{
   response: {
@@ -30,4 +30,4 @@ const webScrapeProductPriceAndQuantitySoldAndHasVideoPredicate = async (
 
   return { response: { currentPrice, quantitySold, hasVideo } }
 }
-export { webScrapeProductPriceAndQuantitySoldAndHasVideoPredicate }
+export { webScrapProductMetadata }

@@ -2,6 +2,7 @@ import { ScrapeType } from "../../enums/scrap-type.enum"
 import { CatalogApiResponse } from "../../models/api-response/api/catalog-response.models"
 import { CatalogReducerResponse } from "../../models/reducers/catalog-reducer.models"
 import { roundNumber } from "../../utils/math.util"
+import { catalogScraper } from "./catalog-scraper.service"
 
 import {
   calculateCommissions,
@@ -19,32 +20,12 @@ const catalogSummary = async ({
   catalogId,
   userId,
 }): Promise<CatalogApiResponse> => {
-  const maxPage = 5
-  const { result: productList } = await webScrapeMlPage(
-    webScrapeCatalogToProductIdAndPricePredicate,
-    {
-      catalogId,
-      scrapeType: ScrapeType.CatalogProductList,
-      maxPage,
-    }
-  )
-
-  const { result: productMetadata } = await (<
-    Promise<{ result: { hasVideo: boolean; amountInt: any } }>
-  >webScrapeMlPage(webScrapeCatalogToMetadataPredicate, {
-    catalogId,
-    scrapeType: ScrapeType.CatalogMetadata,
-  }))
-  const { hasVideo: hasVideoInProductMetadata, amountInt: productSales } =
-    productMetadata
-
-  const { result: productLength } = await webScrapeMlPage(
-    webScrapeCatalogProductLengthPredicate,
-    {
-      catalogId,
-      scrapeType: ScrapeType.CatalogProductList,
-    }
-  )
+  const {
+    productList,
+    hasVideo: hasVideoInProductMetadata,
+    productSales,
+    productLength,
+  } = await catalogScraper(catalogId, { maxPage: 1 })
 
   const amountOfProducts = productLength
 

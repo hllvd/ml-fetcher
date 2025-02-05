@@ -15,9 +15,8 @@ import { roundNumber } from "../../utils/math.util"
 import { convertCatalogIdToProductId } from "../../utils/ml.utils"
 import { fetchProducts } from "./api/products.api.service"
 import { fetchSeller } from "./api/users"
+import { productScraper } from "./product.scraper.service"
 import { productIdsReducer } from "./reducers/product-urls.reducer.service"
-import { webScrapeProductPriceAndQuantitySoldAndHasVideoPredicate } from "./scraper/predicate/product/product-metadata.predicate.service"
-import { webScrapeMlPage } from "./scraper/web.scraper.service"
 
 const getFullProducts = async ({
   userId,
@@ -42,7 +41,7 @@ const getFullProducts = async ({
       const productId = convertCatalogIdToProductId(product.id)
 
       const [scrapProductPage] = await Promise.all([
-        _webScrapeProductMetadata(convertCatalogIdToProductId(product.id)),
+        productScraper(convertCatalogIdToProductId(product.id)),
       ])
 
       const extraFields = _getProductExtraFields({
@@ -221,20 +220,6 @@ const getProductInCorrectOrder = (
     const product = products.find((product) => product.id === productId)
     return product
   })
-}
-
-const _webScrapeProductMetadata = async (productId: string): Promise<any> => {
-  if (!productId.includes("-")) {
-    throw new Error("Invalid product id")
-  }
-  const { result: productPrice } = await webScrapeMlPage(
-    webScrapeProductPriceAndQuantitySoldAndHasVideoPredicate,
-    {
-      productId,
-      scrapeType: ScrapeType.ProductPage,
-    }
-  )
-  return productPrice
 }
 
 export {

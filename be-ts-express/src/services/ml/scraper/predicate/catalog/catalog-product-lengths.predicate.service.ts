@@ -11,19 +11,29 @@ const webScrapeCatalogProductLengthPredicate = async (
 ): Promise<{ response: number }> => {
   const dom = new JSDOM(await response.data)
   const document = dom.window.document
+
+  const lastElementCollection: Array<HTMLLIElement> = Array.from(
+    document.querySelectorAll(
+      ".ui-pdp-s-pagination .andes-pagination li:not(.andes-pagination__button--next)"
+    )
+  )
+  // const lastElement: HTMLLIElement = lastElementCollection.pop()
+  // const lastPageInt = Number.parseInt(lastElement.textContent)
+  // const lastPageUrl: string = lastElement.querySelector("a").href
+  // const htmlPage = await _webScrape(lastPageUrl)
+  // const lastPageMetadata = getCatalogPageMetadata(htmlPage)
+  // const amountOfProduct2 = calculateHowManyProducts(lastPageMetadata)
+
   let pageMetadata = getCatalogPageMetadata(document) as PageMetadata
-  console.log("1 pageMetadata", pageMetadata)
   const currentPageNumber = 1
   let currentPageUrl = pageMetadata.lastPageUrl
   while (currentPageNumber < pageMetadata.lastPageNumber) {
     const htmlPage = await _webScrape(currentPageUrl)
     pageMetadata = getCatalogPageMetadata(htmlPage)
     currentPageUrl = pageMetadata.lastPageUrl
-    console.log("2 pageMetadata", pageMetadata)
     if (!pageMetadata.hasNext) break
   }
   const amountOfProduct = calculateHowManyProducts(pageMetadata)
-  console.log("=====> amountOfProduct", amountOfProduct)
   return { response: amountOfProduct }
 }
 
