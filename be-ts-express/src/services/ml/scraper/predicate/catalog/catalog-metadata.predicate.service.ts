@@ -1,5 +1,6 @@
 import { AxiosResponse } from "axios"
 import { JSDOM } from "jsdom"
+import { PowerSellerStatus } from "../../../../../models/dto/ml-user.models"
 import { sanitizeAmountSold } from "../../../../../utils/ml.utils"
 
 const webScrapeCatalogToMetadataPredicate = async (
@@ -9,6 +10,10 @@ const webScrapeCatalogToMetadataPredicate = async (
     productSales: number
     hasVideo: boolean
     catalogProductLength?: number
+    officialStore?: boolean
+    powerSeller?: PowerSellerStatus
+    starsRating?: number
+    starsAmount?: number
   }
 }> => {
   const dom = new JSDOM(await response.data)
@@ -19,6 +24,17 @@ const webScrapeCatalogToMetadataPredicate = async (
   const clipIconHtml = document.querySelector(
     ".ui-pdp-thumbnail--overlay .clip-picture-icon"
   )
+  const starsRating = document.querySelector(".ui-pdp-review__rating")
+    ?.textContent
+    ? Number.parseFloat(
+        document.querySelector(".ui-pdp-review__rating")?.textContent
+      )
+    : null
+  const starsAmount = document.querySelector(".ui-pdp-review__amount")
+    ? parseInt(
+        document.querySelector(".ui-pdp-review__amount")?.replace(/\D/g, "")
+      )
+    : null
 
   let catalogProductLength = null
   const catalogProductLengthText = document.querySelector(
@@ -29,7 +45,40 @@ const webScrapeCatalogToMetadataPredicate = async (
 
   const hasVideo = !!clipIconHtml
   console.log("hasVideo", hasVideo)
-  return { response: { productSales, hasVideo, catalogProductLength } }
+
+  const officialStore =
+    document.querySelector(".ui-pdp-seller__label-sold")?.textContent ===
+    "Loja oficial"
+
+  const powerSeller = switchPowerSeller(
+    document.querySelector(".ui-seller-data-status__lider-seller > p")
+      ?.textContent
+  )
+
+  return {
+    response: {
+      productSales,
+      hasVideo,
+      catalogProductLength,
+      officialStore,
+      powerSeller,
+      starsRating,
+      starsAmount,
+    },
+  }
+}
+
+const switchPowerSeller = (scrappedText: string) => {
+  switch (scrappedText) {
+    case "MercadoLíder Platinum":
+      return PowerSellerStatus.Platinum
+    case "MercadoLíder Gold":
+      return PowerSellerStatus.Gold
+    case "MercadoLíder":
+      return PowerSellerStatus.Silver
+    default:
+      return null
+  }
 }
 
 const extractCatalogLength = (text: string): number | null => {
