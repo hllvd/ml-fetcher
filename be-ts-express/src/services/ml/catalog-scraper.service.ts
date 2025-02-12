@@ -1,7 +1,7 @@
 import { ScrapeType } from "../../enums/scrap-type.enum"
-import { webScrapeCatalogToMetadataPredicate } from "./scraper/predicate/catalog/catalog-metadata.predicate.service"
 import { webScrapeCatalogProductLengthPredicate } from "./scraper/predicate/catalog/catalog-product-lengths.predicate.service"
 import { webScrapeCatalogToProductIdAndPricePredicate } from "./scraper/predicate/catalog/catalog-productIds-price.predicate.service"
+import { webScrapProductMetadata } from "./scraper/predicate/product/product-metadata.predicate.service"
 import { webScrapeMlPage } from "./scraper/web.scraper.service"
 
 export const catalogScraper = async (
@@ -20,15 +20,15 @@ export const catalogScraper = async (
     Promise<{
       result: {
         hasVideo: boolean
-        productSales: number | null
+        quantitySold: number | null
         catalogProductLength: number | null
       }
     }>
-  >webScrapeMlPage(webScrapeCatalogToMetadataPredicate, {
+  >webScrapeMlPage(webScrapProductMetadata, {
     catalogId,
     scrapeType: ScrapeType.CatalogMetadata,
   }))
-  const { hasVideo, productSales } = productMetadata
+  const { hasVideo, quantitySold } = productMetadata
   let { catalogProductLength: productLength } = productMetadata
 
   // Try to get length o catalog products by webScrapeCatalogToMetadataPredicate, if we don't have this number, we try it by calling webScrapeCatalogProductLengthPredicate
@@ -43,5 +43,5 @@ export const catalogScraper = async (
     productLength = resultCatalogProductLength
   }
 
-  return { productLength, productList, hasVideo, productSales }
+  return { productLength, productList, hasVideo, quantitySold }
 }

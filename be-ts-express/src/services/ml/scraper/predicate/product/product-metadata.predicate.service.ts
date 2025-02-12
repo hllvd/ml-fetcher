@@ -1,33 +1,64 @@
 import { AxiosResponse } from "axios"
 import { JSDOM } from "jsdom"
+import { PowerSellerStatus } from "../../../../../models/dto/ml-user.models"
+import { ProductScrapeOutput } from "../../../../../models/predicate/predicate-response.models"
 import { sanitizeAmountSold } from "../../../../../utils/ml.utils"
+import {
+  queryQuantitySold,
+  queryStartsRating,
+  queryStartsAmount,
+  queryCurrentPrice,
+  queryHasVideo,
+  queryProductLength,
+  queryIsFull,
+  queryOfficialStore,
+  queryPowerSeller,
+  querySellerId,
+  queryProductType,
+} from "../../queries/products.query"
 
 const webScrapProductMetadata = async (
   response: AxiosResponse
 ): Promise<{
-  response: {
-    quantitySold: number
-    currentPrice: number
-    hasVideo: boolean
-  }
+  response: ProductScrapeOutput
 }> => {
   const dom = new JSDOM(await response.data)
   const document = dom.window.document
 
-  const amountHtml = document.querySelector(".ui-pdp-subtitle")
-  const amountStrInner = amountHtml.textContent
-  const quantitySold = sanitizeAmountSold(amountStrInner)
+  const quantitySold = queryQuantitySold(document)
+  const starsRating = queryStartsRating(document)
+  const starsAmount = queryStartsAmount(document)
 
-  const priceHtml = document.querySelector("meta[itemprop=price]")
-  const priceStr = priceHtml.getAttribute("content")
-  const currentPrice = Number.parseFloat(priceStr)
+  const currentPrice = queryCurrentPrice(document)
 
-  const clipIconHtml = document.querySelector(
-    ".ui-pdp-thumbnail--overlay .clip-picture-icon"
-  )
+  const hasVideo = queryHasVideo(document)
 
-  const hasVideo = !!clipIconHtml
+  let catalogProductLength = queryProductLength(document)
 
-  return { response: { currentPrice, quantitySold, hasVideo } }
+  const isFull = queryIsFull(document)
+  const officialStore = queryOfficialStore(document)
+
+  const powerSeller = queryPowerSeller(document)
+
+  const sellerId = querySellerId(document)
+
+  const isProduct = queryProductType(document)
+
+  return {
+    response: {
+      catalogProductLength,
+      currentPrice,
+      quantitySold,
+      hasVideo,
+      isFull,
+      officialStore,
+      powerSeller,
+      starsRating,
+      starsAmount,
+      sellerId,
+      isProduct,
+    },
+  }
 }
+
 export { webScrapProductMetadata }

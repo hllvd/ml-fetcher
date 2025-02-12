@@ -21,7 +21,7 @@ export class WorkerService {
     while (this.isRunning) {
       const jobs = this.batchSize
         ? await this.jobService.GetJobs(this.jobServiceType, this.batchSize)
-        : await this.jobService.GetJobs(this.jobServiceType, 10)
+        : await this.jobService.GetJobs(this.jobServiceType, 2)
       console.log("jobs length", jobs.length)
       try {
         if (jobs.length > 0) {

@@ -28,7 +28,7 @@ export const scrapProductsCatalogsToDb = async <T>(
     jobAndProduct.map(async ({ jobId, productId, type }) => {
       try {
         if (type === EntityType.Catalog) {
-          const { productList, hasVideo, productSales, productLength } =
+          const { productList, hasVideo, quantitySold, productLength } =
             await catalogScraper(productId, { maxPage: 1 })
           await completeTheJob(jobs, jobId, jobsCompleted)
         } else if (type === EntityType.Product) {

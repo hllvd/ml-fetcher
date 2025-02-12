@@ -1,4 +1,3 @@
-import { ScrapeType } from "../../enums/scrap-type.enum"
 import { CatalogApiResponse } from "../../models/api-response/api/catalog-response.models"
 import { CatalogReducerResponse } from "../../models/reducers/catalog-reducer.models"
 import { roundNumber } from "../../utils/math.util"
@@ -10,10 +9,6 @@ import {
   getProducts,
 } from "./products.service"
 import { catalogReducer } from "./reducers/catalog.reducer.service"
-import { webScrapeCatalogToMetadataPredicate } from "./scraper/predicate/catalog/catalog-metadata.predicate.service"
-import { webScrapeCatalogProductLengthPredicate } from "./scraper/predicate/catalog/catalog-product-lengths.predicate.service"
-import { webScrapeCatalogToProductIdAndPricePredicate } from "./scraper/predicate/catalog/catalog-productIds-price.predicate.service"
-import { webScrapeMlPage } from "./scraper/web.scraper.service"
 import { getProductSellers } from "./seller.service"
 
 const catalogSummary = async ({
@@ -23,7 +18,7 @@ const catalogSummary = async ({
   const {
     productList,
     hasVideo: hasVideoInProductMetadata,
-    productSales,
+    quantitySold,
     productLength,
   } = await catalogScraper(catalogId, { maxPage: 1 })
 
@@ -31,7 +26,7 @@ const catalogSummary = async ({
 
   console.log("hasVideoInProductMetadata", hasVideoInProductMetadata)
   console.log("productList", productList)
-  console.log("productSales", productSales)
+  console.log("quantitySold", quantitySold)
   console.log("productLength", productLength)
   console.log("amountOfProducts", amountOfProducts)
   const productListOnlyIds = productList.map((e) => e.productIdStr)
@@ -60,7 +55,7 @@ const catalogSummary = async ({
 
   const catalogReducerWithSummary = _summarizeCatalog({
     catalog: { ...catalogReducerValues, length: amountOfProducts },
-    sales: productSales,
+    sales: quantitySold,
   })
 
   return {
