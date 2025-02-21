@@ -8,7 +8,9 @@ import { ProductViewsSummary } from "../entities/sql/views-summary.entity"
 import { EntityType } from "../enums/entity-type.enum"
 import brandsPersistence from "./brands.repository"
 import catalogFieldsRepository from "./catalog-fields.repository"
+import SellerRepository from "./seller.repository"
 import sellerRepository from "./seller.repository"
+
 import stateFieldRepository from "./state-field.repository"
 import viewsRepository from "./views.repository"
 
@@ -98,6 +100,7 @@ const upsertSingle = async (catalogInfo: ProductsCatalogs) => {
     }
 
     if (catalogInfo?.seller) {
+      const sellerRepository = new SellerRepository(dataSource)
       const seller = await sellerRepository.upsert(catalogInfo.seller)
       catalog.seller = seller
     }

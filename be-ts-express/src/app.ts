@@ -1,70 +1,53 @@
 import express from "express"
-import routes from "./routes/index.route"
+
 import "reflect-metadata"
 import cors from "cors"
 import { persistentMiddleware } from "./middlewares/persistent.middleware"
 import dataSource from "./db/data-source"
 import { entityFromDbMiddleware } from "./middlewares/entity-from-db.middleware"
-import { WorkerManagerService } from "./worker/services/worker-manager.service"
+import { InversifyExpressServer } from "inversify-express-utils"
+import { container } from "./inversify.config" // Import your Inversify container
 
-// Create an instance of the Express application
-const app = express()
 const port = process.env.PORT || 3333
 
-// Middleware
-app.use(cors())
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
+// 1. Create the base Express app
+const app = express()
 
-// Get Entity From DB
-app.use(entityFromDbMiddleware)
+// 2. Create Inversify Express Server with the container and existing app
+const server = new InversifyExpressServer(
+  container,
+  null,
+  { rootPath: "/api" }, // Optional root path
+  app // Pass the existing Express app instance
+)
 
-// Routes
-app.use("/", routes)
-//app.post("/notification", notificationController.notification) d
-// Persistent middleware
-app.use(persistentMiddleware)
-// Get Entity From DB
-app.use(entityFromDbMiddleware)
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack)
-  res.status(500).send("Something went wrong!")
+// 3. Configure middleware using Inversify's setConfig
+server.setConfig((expressApp) => {
+  // Add your existing middleware
+  expressApp.use(cors())
+  expressApp.use(express.json())
+  expressApp.use(express.urlencoded({ extended: true }))
+
+  // Add your existing routes
+
+  // Add other middlewares (uncomment if needed)
+  // expressApp.use(persistentMiddleware);
+  // expressApp.use(entityFromDbMiddleware);
 })
 
-const workerManager = new WorkerManagerService()
-
-// Start workers
-
-workerManager.startWorker({
-  id: "reportWorker",
-  jobServiceType: 0,
-  batchSize: 10,
-  delay: 3000,
-  workerFunction: "fetchProductsToDbWorker",
-  stopOnFail: false,
+// 4. Configure error handling (optional)
+server.setErrorConfig((expressApp) => {
+  expressApp.use((err: any, req: any, res: any, next: any) => {
+    console.error(err.stack)
+    res.status(500).send("Something went wrong!")
+  })
 })
 
-workerManager.startWorker({
-  id: "reportWorker2",
-  jobServiceType: 1,
-  batchSize: 1,
-  delay: 1000,
-  workerFunction: "fetchCatalogToDbWorker",
-  stopOnFail: false,
-})
+// 5. Build the final app with Inversify and Express configurations
+const inversifyApp = server.build()
 
-// List active workers
-//console.log("Active workers:", workerManager.getWorkerIds())
-
-// Stop all workers after 10 seconds
-// setTimeout(() => {
-//   workerManager.stopAllWorkers()
-//   console.log("All workers stopped.")
-// }, 100000)
-
-// Start the server
-app.listen(port, async () => {
+// 6. Start the server with database initialization
+inversifyApp.listen(port, async () => {
   try {
     await dataSource.initialize()
     console.log("Data source has been initialized.")

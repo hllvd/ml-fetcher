@@ -10,7 +10,7 @@ let connectionOptions: DataSourceOptions = {
   password: MYSQL_PASSWORD,
   database: "ml",
   synchronize: false,
-  logging: true,
+  logging: false,
   entities: ["dist/entities/sql/*.entity{.ts,.js}"],
   migrations: ["dist/db/migrations/*{.ts,.js}"],
 }

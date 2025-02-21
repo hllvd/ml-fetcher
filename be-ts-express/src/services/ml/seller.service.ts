@@ -1,3 +1,4 @@
+import { inject } from "inversify"
 import { Seller } from "../../entities/sql/seller.entity"
 import { MLProduct } from "../../models/dto/ml-product.models"
 import { ISellerApiClient } from "../../models/interfaces/sellers/i-seller-api-client.interface"
@@ -7,13 +8,14 @@ import { fetchSeller } from "./api/users"
 
 export class SellerService {
   constructor(
-    private sellerRepository: ISellerRepository,
-    private sellerApiClient: ISellerApiClient,
-    private sellerConverter: ISellerConverter
+    @inject("ISellerRepository") private sellerRepository: ISellerRepository,
+    @inject("ISellerApiClient") private sellerApiClient: ISellerApiClient,
+    @inject("ISellerConverter") private sellerConverter: ISellerConverter
   ) {}
 
   async getSeller(sellerId: string): Promise<Seller> {
-    let seller = await this.sellerRepository.getSellerById(sellerId)
+    const sellerIdNumber = parseInt(sellerId)
+    let seller = await this.sellerRepository.getById(sellerIdNumber)
 
     if (!seller) {
       const apiResponse = await this.sellerApiClient.fetchSeller(sellerId)
