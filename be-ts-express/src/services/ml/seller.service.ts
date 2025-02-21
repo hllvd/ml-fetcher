@@ -1,5 +1,29 @@
+import { Seller } from "../../entities/sql/seller.entity"
 import { MLProduct } from "../../models/dto/ml-product.models"
+import { ISellerApiClient } from "../../models/interfaces/sellers/i-seller-api-client.interface"
+import { ISellerConverter } from "../../models/interfaces/sellers/i-seller-converter.interface"
+import { ISellerRepository } from "../../models/interfaces/sellers/i-seller-repository.interface"
 import { fetchSeller } from "./api/users"
+
+export class SellerService {
+  constructor(
+    private sellerRepository: ISellerRepository,
+    private sellerApiClient: ISellerApiClient,
+    private sellerConverter: ISellerConverter
+  ) {}
+
+  async getSeller(sellerId: string): Promise<Seller> {
+    let seller = await this.sellerRepository.getSellerById(sellerId)
+
+    if (!seller) {
+      const apiResponse = await this.sellerApiClient.fetchSeller(sellerId)
+      seller = this.sellerConverter.convert(apiResponse)
+      await this.sellerRepository.upsert(seller)
+    }
+
+    return seller
+  }
+}
 
 const getProductSellers = async ({
   products,
@@ -18,23 +42,6 @@ const getProductSellers = async ({
     })
   )
   return productsWithSellers
-}
-
-/**
- *
- * Try to get the category info from the cache/db, if not found, fetch it from the API
- * @param products
- * @param userId
- * @returns
- */
-const getProductSellersPersistent = async ({
-  products,
-  userId,
-}: {
-  products: Array<MLProduct>
-  userId: string
-}): Promise<void> => {
-  return
 }
 
 const _getSeller = async ({
