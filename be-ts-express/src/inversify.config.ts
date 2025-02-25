@@ -1,27 +1,45 @@
 import { Container } from "inversify"
+import { DataSource } from "typeorm"
+import AppDataSource from "./config/orm.config"
 import { CatalogController } from "./controller/catalog.controller"
 import { CategoriesController } from "./controller/categories.controller"
 import { ExampleController } from "./controller/example.controller"
 import { ProductController } from "./controller/product.controller"
 import { SearchController } from "./controller/search.controller"
 import { SellerConverter } from "./converters/ml/sellers.converter"
+import { IProductApiClient } from "./models/interfaces/products/i-product-api-client.interface"
+import { IProductService } from "./models/interfaces/products/i-product-service.interface"
 import { ISellerApiClient } from "./models/interfaces/sellers/i-seller-api-client.interface"
 import { ISellerConverter } from "./models/interfaces/sellers/i-seller-converter.interface"
 import { ISellerRepository } from "./models/interfaces/sellers/i-seller-repository.interface"
+import { ISellerService } from "./models/interfaces/sellers/i-seller-service.interface"
 import SellerRepository from "./repository/seller.repository"
-import { SellerApiClient } from "./services/ml/seller-fetcher.service"
+import { ProductApiClient } from "./services/ml/api/product-api-client.service"
+import { SellerApiClient } from "./services/ml/api/seller-api-client.service"
+import { ProductService } from "./services/ml/products.service"
+import { SellerService } from "./services/ml/seller.service"
+import { TYPES } from "./types"
 
 const container = new Container()
 
-container.bind<ISellerRepository>("ISellerRepository").to(SellerRepository)
-container.bind<ISellerApiClient>("ISellerApiClient").to(SellerApiClient)
-container.bind<ISellerConverter>("ISellerConverter").to(SellerConverter)
-container.bind<ExampleController>("ExampleController").to(ExampleController)
-container.bind<CatalogController>("CatalogController").to(CatalogController)
+container.bind<ISellerRepository>(TYPES.ISellerRepository).to(SellerRepository)
+container.bind<ISellerApiClient>(TYPES.ISellerApiClient).to(SellerApiClient)
+container.bind<ISellerConverter>(TYPES.ISellerConverter).to(SellerConverter)
+container.bind<ISellerService>(TYPES.ISellerService).to(SellerService)
+container.bind<IProductApiClient>(TYPES.IProductApiClient).to(ProductApiClient)
 container
-  .bind<CategoriesController>("CategoriesController")
+  .bind<IProductService>(TYPES.ProductService)
+  .to(ProductService)
+  .inSingletonScope()
+container.bind<ExampleController>(TYPES.ExampleController).to(ExampleController)
+container.bind<CatalogController>(TYPES.CatalogController).to(CatalogController)
+container
+  .bind<CategoriesController>(TYPES.CategoriesController)
   .to(CategoriesController)
-container.bind<ProductController>("ProductController").to(ProductController)
-container.bind<SearchController>("SearchController").to(SearchController)
+container.bind<ProductController>(TYPES.ProductController).to(ProductController)
+container.bind<SearchController>(TYPES.SearchController).to(SearchController)
+
+// Bind the DataSource
+container.bind<DataSource>(TYPES.DataSource).toConstantValue(AppDataSource)
 
 export { container }

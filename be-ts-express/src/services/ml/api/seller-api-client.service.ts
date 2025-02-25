@@ -1,6 +1,6 @@
-import { MLUser } from "../../models/dto/ml-user.models"
-import { ISellerApiClient } from "../../models/interfaces/sellers/i-seller-api-client.interface"
-import { fetchSeller } from "./api/users"
+import { MLUser } from "../../../models/dto/ml-user.models"
+import { ISellerApiClient } from "../../../models/interfaces/sellers/i-seller-api-client.interface"
+import { fetchSeller } from "./users"
 
 export class SellerApiClient implements ISellerApiClient {
   private _userId: string

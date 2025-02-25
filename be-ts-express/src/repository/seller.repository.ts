@@ -1,13 +1,16 @@
+import { inject, injectable } from "inversify"
 import { DataSource } from "typeorm/data-source/DataSource"
 import { Repository } from "typeorm/repository/Repository"
 import { Seller } from "../entities/sql/seller.entity"
 import { ISellerRepository } from "../models/interfaces/sellers/i-seller-repository.interface"
+import { TYPES } from "../types"
 
+@injectable()
 export default class SellerRepository implements ISellerRepository {
   private sellerRepository: Repository<Seller>
   private cache: Record<string, Seller> = {}
 
-  constructor(private dataSource: DataSource) {
+  constructor(@inject(TYPES.DataSource) private dataSource: DataSource) {
     this.sellerRepository = this.dataSource.getRepository(Seller)
   }
 

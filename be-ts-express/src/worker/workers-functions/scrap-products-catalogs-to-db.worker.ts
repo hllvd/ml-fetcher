@@ -3,7 +3,7 @@ import { MY_USER_ID } from "../../constants"
 import { Jobs } from "../../entities/sql/jobs.entity"
 import { EntityType } from "../../enums/entity-type.enum"
 import { catalogScraper } from "../../services/ml/catalog-scraper.service"
-import { catalogSummary } from "../../services/ml/catalog.service"
+
 import { productScraper } from "../../services/ml/product.scraper.service"
 import { saveCatalogToDb } from "../../services/persistence/product-catalog.persistence"
 

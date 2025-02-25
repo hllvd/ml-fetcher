@@ -4,16 +4,19 @@ import { MLProduct } from "../../models/dto/ml-product.models"
 import { ISellerApiClient } from "../../models/interfaces/sellers/i-seller-api-client.interface"
 import { ISellerConverter } from "../../models/interfaces/sellers/i-seller-converter.interface"
 import { ISellerRepository } from "../../models/interfaces/sellers/i-seller-repository.interface"
+import { ISellerService } from "../../models/interfaces/sellers/i-seller-service.interface"
+import { TYPES } from "../../types"
 import { fetchSeller } from "./api/users"
 
-export class SellerService {
+export class SellerService implements ISellerService {
   constructor(
-    @inject("ISellerRepository") private sellerRepository: ISellerRepository,
-    @inject("ISellerApiClient") private sellerApiClient: ISellerApiClient,
-    @inject("ISellerConverter") private sellerConverter: ISellerConverter
+    @inject(TYPES.ISellerRepository)
+    private sellerRepository: ISellerRepository,
+    @inject(TYPES.ISellerApiClient) private sellerApiClient: ISellerApiClient,
+    @inject(TYPES.ISellerConverter) private sellerConverter: ISellerConverter
   ) {}
 
-  async getSeller(sellerId: string): Promise<Seller> {
+  public async getSeller(sellerId: string): Promise<Seller> {
     const sellerIdNumber = parseInt(sellerId)
     let seller = await this.sellerRepository.getById(sellerIdNumber)
 

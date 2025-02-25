@@ -1,6 +1,5 @@
 import { MY_USER_ID } from "../../constants"
 import { Jobs } from "../../entities/sql/jobs.entity"
-import { catalogSummary } from "../../services/ml/catalog.service"
 import { saveCatalogToDb } from "../../services/persistence/product-catalog.persistence"
 
 export const fetchCatalogToDbWorker = async <T>(
@@ -17,23 +16,23 @@ export const fetchCatalogToDbWorker = async <T>(
 
   const jobsCompleted: Array<T> = []
 
-  await Promise.all(
-    jobAndProduct.map(async ({ jobId, productId: catalogId }) => {
-      try {
-        const catalog = await catalogSummary({ userId: MY_USER_ID, catalogId })
-        await saveCatalogToDb(catalog)
-        const job = jobs.find((j) => j.id === jobId)
-        if (job) {
-          jobsCompleted.push(job as T)
-        }
-      } catch (error) {
-        console.error(
-          `fetchCatalogToDbWorker error: jobId:${jobId} | catalogId:${catalogId}`,
-          error
-        )
-      }
-    })
-  )
+  // await Promise.all(
+  //   jobAndProduct.map(async ({ jobId, productId: catalogId }) => {
+  //     try {
+  //       const catalog = await catalogSummary({ userId: MY_USER_ID, catalogId })
+  //       await saveCatalogToDb(catalog)
+  //       const job = jobs.find((j) => j.id === jobId)
+  //       if (job) {
+  //         jobsCompleted.push(job as T)
+  //       }
+  //     } catch (error) {
+  //       console.error(
+  //         `fetchCatalogToDbWorker error: jobId:${jobId} | catalogId:${catalogId}`,
+  //         error
+  //       )
+  //     }
+  //   })
+  // )
 
   return jobsCompleted
 }

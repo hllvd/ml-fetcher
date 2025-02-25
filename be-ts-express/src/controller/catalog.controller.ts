@@ -6,7 +6,7 @@ import {
   RequestExtended,
 } from "../models/extends/params/request-custom.model"
 import { getCatalogVisitsSummary } from "../services/ml/catalog-visits.service"
-import { catalogSummary } from "../services/ml/catalog.service"
+
 import { webScrapeCatalogToProductIdAndPricePredicate } from "../services/ml/scraper/predicate/catalog/catalog-productIds-price.predicate.service"
 import { webScrapeMlPage } from "../services/ml/scraper/web.scraper.service"
 
@@ -21,16 +21,16 @@ export class CatalogController {
     const catalogId = req.query?.catalogId?.toString()
     const userId = req.query?.userId?.toString() ?? "1231084821"
 
-    const catalogSummaryResponse = await catalogSummary({
-      catalogId,
-      userId,
-    })
+    // const catalogSummaryResponse = await catalogSummary({
+    //   catalogId,
+    //   userId,
+    // })
 
     const response = {
-      ...catalogSummaryResponse,
+      // ...catalogSummaryResponse,
     }
     req.persistency = {} as PersistencyInfo
-    req.persistency.catalogInfo = response
+    // req.persistency.catalogInfo = response
 
     next()
   }
