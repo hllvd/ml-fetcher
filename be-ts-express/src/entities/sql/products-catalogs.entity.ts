@@ -8,7 +8,6 @@ import {
   OneToMany,
   JoinColumn,
   UpdateDateColumn,
-  ManyToMany,
 } from "typeorm"
 import { EntityType } from "../../enums/entity-type.enum"
 import { BrandModel } from "./brand-model.entity"

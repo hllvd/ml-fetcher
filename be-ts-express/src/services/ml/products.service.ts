@@ -25,7 +25,8 @@ import { SellerService } from "./seller.service"
 @injectable()
 export class ProductService implements IProductService {
   constructor(
-    // @inject(TYPES.pro) private productRepository: IProductRepository,
+    @inject(TYPES.IProductRepository)
+    private productRepository: IProductRepository,
     @inject(TYPES.IProductApiClient)
     private productApiClient: IProductApiClient,
     @inject(TYPES.ISellerService) private sellerService: SellerService
@@ -55,6 +56,11 @@ export class ProductService implements IProductService {
   }: FetchProductsArgument): Promise<ProductsCatalogs[]> {
     const productIdsWIthOutDash = productIds.map((id) => id.replaceAll("-", ""))
 
+    const productsFromDb = await this.productRepository.getByIds(
+      productIdsWIthOutDash
+    )
+
+    // console.log("productsFromDb", productsFromDb)
     const products = await this.getMlProduct(userId, productIdsWIthOutDash)
 
     const productsWithSeller = await Promise.all(

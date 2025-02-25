@@ -1,5 +1,7 @@
-import { IProduct } from "./i-product.interface"
+import { ProductsCatalogs } from "../../../entities/sql/products-catalogs.entity"
 
 export interface IProductRepository {
-  getProductById(productId: string): Promise<IProduct | null>
+  getByIds(productIds: string[]): Promise<ProductsCatalogs[]>
+  upsert(productCatalog: ProductsCatalogs): Promise<ProductsCatalogs>
+  upsert(productCatalogs: ProductsCatalogs[]): Promise<ProductsCatalogs[]>
 }

@@ -1,10 +1,12 @@
 export const TYPES = {
   ProductService: Symbol.for("ProductService"),
   ProductController: Symbol.for("ProductController"),
+  AuthenticationController: Symbol.for("AuthenticationController"),
   ISellerRepository: Symbol.for("ISellerRepository"),
   ISellerApiClient: Symbol.for("ISellerApiClient"),
   ISellerConverter: Symbol.for("ISellerConverter"),
   ISellerService: Symbol.for("ISellerService"),
+  IProductRepository: Symbol.for("IProductRepository"),
   IProductApiClient: Symbol.for("IProductApiClient"),
   ExampleController: Symbol.for("ExampleController"),
   CatalogController: Symbol.for("CatalogController"),
