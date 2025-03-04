@@ -22,3 +22,6 @@ export const convertCurrencyStrings = (currencyStrings: string): number => {
 export const getEanIfExist = (attributes): string | null => {
   return attributes?.find((attr) => attr.id == "GTIN")?.value_name ?? null
 }
+
+export const getAttributeValueName = (attributes, name) =>
+  attributes?.find((attr) => attr.id == name.toUpperCase())?.value_name ?? null

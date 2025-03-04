@@ -17,7 +17,10 @@ import { FetchProductsArgument } from "../../models/params/fetch-product.model"
 import { TYPES } from "../../types"
 import { calculateDaysFrom } from "../../utils/day-calculation.util"
 import { roundNumber } from "../../utils/math.util"
-import { convertCatalogIdToProductId } from "../../utils/ml.utils"
+import {
+  convertCatalogIdToProductId,
+  getAttributeValueName,
+} from "../../utils/ml.utils"
 import { productScraper } from "./product.scraper.service"
 import { productIdsReducer } from "./reducers/product-urls.reducer.service"
 import { SellerService } from "./seller.service"
@@ -40,10 +43,10 @@ export class ProductService implements IProductService {
     return (
       await Promise.all(
         productIdMatrix.map(async (productIds): Promise<MLProduct[]> => {
-          const productIdStrs: string = productIds.join(", ")
+          const productIdsStr: string = productIds.join(", ")
           return await this.productApiClient.fetchProducts(
             userId,
-            productIdStrs
+            productIdsStr
           )
         })
       )
@@ -54,67 +57,32 @@ export class ProductService implements IProductService {
     userId,
     productIds,
   }: FetchProductsArgument): Promise<ProductsCatalogs[]> {
-    const productIdsWIthOutDash = productIds.map((id) => id.replaceAll("-", ""))
+    const productIdsWithoutDash = productIds.map((id) => id.replaceAll("-", ""))
 
-    const productsFromDb = await this.productRepository.getByIds(
-      productIdsWIthOutDash
+    const productsFromDb = await this.loadProductsFromDB(productIds)
+    const productIdsNotFromDB = this.getProductIdsNotFromDB(
+      productsFromDb.map((p) => p.id),
+      productIdsWithoutDash
     )
 
-    // console.log("productsFromDb", productsFromDb)
-    const products = await this.getMlProduct(userId, productIdsWIthOutDash)
+    const products = await this.getMlProduct(userId, productIdsNotFromDB)
 
-    const productsWithSeller = await Promise.all(
-      products.map(async (p) => {
-        const state = p.seller_address.state.id
+    const productsWithSeller = await this.adjustSeller(products)
 
-        const seller: MLUser = {
-          id: p.seller_id,
-          address: { state },
-        }
-        return { ...p, seller }
-      })
-    )
-
-    const productsWithSellerAndMetadata = await Promise.all(
-      productsWithSeller.map(async (product) => {
-        const productId = convertCatalogIdToProductId(product.id)
-
-        const [scrapProductPage] = await Promise.all([
-          productScraper(convertCatalogIdToProductId(product.id)),
-        ])
-
-        const extraFields = this.getProductExtraFields({
-          product,
-          currentPrice: scrapProductPage?.currentPrice,
-          quantitySold: scrapProductPage?.quantitySold,
-        })
-
-        const ean = this.getEanFromProductObj(product)
-        extraFields.ean = ean
-        extraFields.has_video = scrapProductPage.hasVideo
-        extraFields.picture_count = product.pictures.length
-        extraFields.supermarket_eligible = product.tags.includes(
-          "supermarket_eligible"
-        )
-
-        let category = null
-
-        return {
-          category,
-          productId,
-          ...product,
-          ...extraFields,
-        }
-      })
+    const productsWithSellerAndMetadata = await this.addProductScrapeMetadata(
+      productsWithSeller
     )
 
     // Convert to ProductCatalogs db Entity
-    const productConverted = productsWithSellerAndMetadata.map((p) =>
-      convertProductApiResponseToProductCatalogEntity(p, EntityType.Product)
-    )
+    const productConverted: Array<ProductsCatalogs> =
+      productsWithSellerAndMetadata.map((p) =>
+        convertProductApiResponseToProductCatalogEntity(p, EntityType.Product)
+      )
+
+    await this.saveProductsToDb(productConverted)
 
     // Return the final list of products with all the necessary information
-    return productConverted
+    return [...productsFromDb, ...productConverted]
   }
 
   private getProductExtraFields({
@@ -128,6 +96,7 @@ export class ProductService implements IProductService {
   }): MlProductExtraFields & { commissions: MLProductCommission } {
     quantitySold = quantitySold ?? 1
     const revenue = currentPrice * quantitySold
+
     const days = calculateDaysFrom(product.date_created)
     const daily_revenue = roundNumber(revenue / days)
     const has_promotion =
@@ -171,10 +140,83 @@ export class ProductService implements IProductService {
   private getEanFromProductObj(product: MLProduct): string | null {
     try {
       return product.attributes
-        .find((a) => a.id === "GTIN")
+        .find(
+          (a) =>
+            a.id === "GTIN" ||
+            a.id === "EAN" ||
+            a.id === "UPC" ||
+            a.id === "MPN"
+        )
         .value_name?.toString()
     } catch (e) {
       return null
     }
+  }
+
+  private async loadProductsFromDB(
+    productIds: string[]
+  ): Promise<ProductsCatalogs[]> {
+    return (await this.productRepository.getByIds(productIds)) ?? []
+  }
+
+  private getProductIdsNotFromDB(
+    productIdsFromDb: string[],
+    selectedProductsIds: string[]
+  ): string[] {
+    return selectedProductsIds.filter((p) => !productIdsFromDb.includes(p))
+  }
+
+  private async saveProductsToDb(products: ProductsCatalogs[]) {
+    await this.productRepository.upsert(products)
+  }
+
+  private async adjustSeller(products: MLProduct[]) {
+    const productsWithSeller = await Promise.all(
+      products.map(async (p) => {
+        const state = p.seller_address.state.id
+        const seller: MLUser = {
+          id: p.seller_id,
+          address: { state },
+        }
+        return { ...p, seller }
+      })
+    )
+    return productsWithSeller
+  }
+
+  private async addProductScrapeMetadata(productsWithSeller) {
+    return await Promise.all(
+      productsWithSeller.map(async (product) => {
+        const productId = convertCatalogIdToProductId(product.id)
+        const [scrapeProduct] = await Promise.all([
+          productScraper(convertCatalogIdToProductId(product.id)),
+        ])
+
+        const extraFields = this.getProductExtraFields({
+          product,
+          currentPrice: scrapeProduct?.result.currentPrice,
+          quantitySold: scrapeProduct?.result.quantitySold,
+        })
+
+        const ean = this.getEanFromProductObj(product)
+        extraFields.ean = ean
+        extraFields.has_video = scrapeProduct?.result?.hasVideo
+        extraFields.picture_count = product.pictures.length
+        extraFields.supermarket_eligible = product.tags.includes(
+          "supermarket_eligible"
+        )
+
+        console.log("scrapProductPage =>", scrapeProduct.result)
+
+        let category = null
+
+        return {
+          category,
+          productId,
+          ...product,
+          ...extraFields,
+        }
+      })
+    )
   }
 }

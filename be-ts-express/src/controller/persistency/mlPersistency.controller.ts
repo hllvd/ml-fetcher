@@ -24,7 +24,6 @@ import {
 import { RequestExtended } from "../../models/extends/params/request-custom.model"
 import jobGroupsRepository from "../../repository/job-groups.repository"
 import jobsRepository from "../../repository/jobs.repository"
-import productsCatalogsRepository from "../../repository/products-catalogs.repository"
 import searchRepository from "../../repository/search.repository"
 import { JobsService } from "../../services/jobs/jobs.service"
 
@@ -78,31 +77,31 @@ const items_jobs_list = async (
   })
   res.status(200).json([...jobs])
 }
-const items_jobs_create = async (
-  req: RequestExtended,
-  res: Response,
-  next: NextFunction
-) => {
-  const jobGroups = await jobGroupsRepository.create("desc 2")
+// const items_jobs_create = async (
+//   req: RequestExtended,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   const jobGroups = await jobGroupsRepository.create("desc 2")
 
-  const product1 = new ProductsCatalogs()
-  product1.type = 0
-  product1.id = "MLB2760464533"
-  await productsCatalogsRepository.upsert(product1)
-  const product = await dataSource
-    .getRepository(ProductsCatalogs)
-    .findOne({ where: { id: "MLB2760464533" } })
+//   const product1 = new ProductsCatalogs()
+//   product1.type = 0
+//   product1.id = "MLB2760464533"
+//   await productsCatalogsRepository.upsert(product1)
+//   const product = await dataSource
+//     .getRepository(ProductsCatalogs)
+//     .findOne({ where: { id: "MLB2760464533" } })
 
-  const job1 = new Jobs()
-  job1.product = product
-  job1.jobGroups = jobGroups
-  await dataSource.manager.getRepository(Jobs).save(job1)
+//   const job1 = new Jobs()
+//   job1.product = product
+//   job1.jobGroups = jobGroups
+//   await dataSource.manager.getRepository(Jobs).save(job1)
 
-  // await jobsRepository.save(job1)
-  // await jobsRepository.save(job1)
+//   // await jobsRepository.save(job1)
+//   // await jobsRepository.save(job1)
 
-  res.status(200).json({})
-}
+//   res.status(200).json({})
+// }
 
 const job = async () => {}
 

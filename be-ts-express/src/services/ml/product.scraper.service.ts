@@ -5,9 +5,8 @@ import { webScrapeMlPage } from "./scraper/web.scraper.service"
 export const productScraper = async (
   productId: string
 ): Promise<{
-  currentPrice: number
-  quantitySold: number
-  hasVideo: boolean
+  result?: { currentPrice: number; quantitySold: number; hasVideo: boolean }
+  pages?: Array<string>
 }> => {
   if (!productId.includes("-")) {
     throw new Error("Invalid product id")

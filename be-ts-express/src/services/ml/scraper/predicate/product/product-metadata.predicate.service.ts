@@ -5,8 +5,6 @@ import { ProductScrapeOutput } from "../../../../../models/predicate/predicate-r
 import { sanitizeAmountSold } from "../../../../../utils/ml.utils"
 import {
   queryQuantitySold,
-  queryStartsRating,
-  queryStartsAmount,
   queryCurrentPrice,
   queryHasVideo,
   queryProductLength,
@@ -15,6 +13,8 @@ import {
   queryPowerSeller,
   querySellerId,
   queryProductType,
+  queryStarsAmount,
+  queryStarsRating,
 } from "../../queries/products.query"
 
 const webScrapProductMetadata = async (
@@ -26,8 +26,8 @@ const webScrapProductMetadata = async (
   const document = dom.window.document
 
   const quantitySold = queryQuantitySold(document)
-  const starsRating = queryStartsRating(document)
-  const starsAmount = queryStartsAmount(document)
+  const starsRating = queryStarsRating(document)
+  const starsAmount = queryStarsAmount(document)
 
   const currentPrice = queryCurrentPrice(document)
 
@@ -40,7 +40,7 @@ const webScrapProductMetadata = async (
 
   const powerSeller = queryPowerSeller(document)
 
-  const sellerId = querySellerId(document)
+  const sellerId = 3 //querySellerId(document)
 
   const isProduct = queryProductType(document)
 

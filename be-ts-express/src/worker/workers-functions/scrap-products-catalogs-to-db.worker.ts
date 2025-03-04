@@ -5,7 +5,6 @@ import { EntityType } from "../../enums/entity-type.enum"
 import { catalogScraper } from "../../services/ml/catalog-scraper.service"
 
 import { productScraper } from "../../services/ml/product.scraper.service"
-import { saveCatalogToDb } from "../../services/persistence/product-catalog.persistence"
 
 export const scrapProductsCatalogsToDb = async <T>(
   data: any[]
@@ -32,9 +31,10 @@ export const scrapProductsCatalogsToDb = async <T>(
             await catalogScraper(productId, { maxPage: 1 })
           await completeTheJob(jobs, jobId, jobsCompleted)
         } else if (type === EntityType.Product) {
-          const { currentPrice, quantitySold, hasVideo } = await productScraper(
-            productId
-          )
+          /** TODO fix scrap result */
+          // const { currentPrice, quantitySold, hasVideo } = await productScraper(
+          //   productId
+          // )
           await completeTheJob(jobs, jobId, jobsCompleted)
         }
       } catch (error) {

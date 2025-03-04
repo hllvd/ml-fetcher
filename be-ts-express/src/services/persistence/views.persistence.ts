@@ -8,13 +8,12 @@ import { ProductViewsSummary } from "../../entities/sql/views-summary.entity"
 import { EntityType } from "../../enums/entity-type.enum"
 import { CatalogVisitsApiResponse } from "../../models/api-response/api/catalog-visits-response.models"
 import { ProductVisitsApiResponse } from "../../models/api-response/api/product-visits-response.models"
-import viewsRepository from "../../repository/views.repository"
 
 export const saveCatalogViewsDb = async (
   viewInfo: CatalogVisitsApiResponse
 ) => {
   const view = catalogViewsResponseToViewsEntity(viewInfo)
-  await viewsRepository.upsert(view)
+  //await viewsRepository.upsert(view)
 }
 
 export const saveProductViewToDb = async (
@@ -23,7 +22,7 @@ export const saveProductViewToDb = async (
   const view = productViewsResponseToViewsEntity(viewInfo)
 
   try {
-    await viewsRepository.upsert(view)
+    // await viewsRepository.upsert(view)
     await dataSource.manager.upsert(
       ProductViewsSummary,
       [view],

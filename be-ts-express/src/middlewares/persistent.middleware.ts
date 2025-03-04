@@ -1,10 +1,6 @@
 import { NextFunction, Response } from "express"
 import { RequestExtended } from "../models/extends/params/request-custom.model"
-import {
-  saveCatalogToDb,
-  saveProductToDb,
-} from "../services/persistence/product-catalog.persistence"
-import { saveSearchResultToDb } from "../services/persistence/search-results.persistence"
+
 import {
   saveCatalogViewsDb,
   saveProductViewToDb,
@@ -27,11 +23,11 @@ const persistentMiddleware = async (
 
   try {
     console.log("persistentMiddleware 4")
-    if (productInfo) await saveProductToDb(productInfo)
-    if (catalogInfo) await saveCatalogToDb(catalogInfo)
-    if (catalogViewsInfo) await saveCatalogViewsDb(catalogViewsInfo)
-    if (productViewInfo) await saveProductViewToDb(productViewInfo)
-    if (searchResultsInfo) await saveSearchResultToDb(searchResultsInfo)
+    // if (productInfo) await saveProductToDb(productInfo)
+    // if (catalogInfo) await saveCatalogToDb(catalogInfo)
+    // if (catalogViewsInfo) await saveCatalogViewsDb(catalogViewsInfo)
+    // if (productViewInfo) await saveProductViewToDb(productViewInfo)
+    // if (searchResultsInfo) await saveSearchResultToDb(searchResultsInfo)
     console.log("persistentMiddleware 5")
   } catch (e) {
     console.log("persistentMiddleware 6")

@@ -4,7 +4,7 @@ import { MLProduct } from "../../../models/dto/ml-product.models"
 import { PowerSellerStatus } from "../../../models/dto/ml-user.models"
 import { CatalogReducerResponse } from "../../../models/reducers/catalog-reducer.models"
 import { roundNumber } from "../../../utils/math.util"
-import { getEanIfExist } from "../../../utils/ml.utils"
+import { getAttributeValueName, getEanIfExist } from "../../../utils/ml.utils"
 
 export const catalogReducer = (
   catalog: Array<MLProduct>
@@ -107,11 +107,11 @@ export const catalogReducer = (
           : acc.dateCreated
 
       acc.brandModel.brand =
-        acc.brandModel.brand || _getAttributeValueName(attributes, "BRAND")
+        acc.brandModel.brand || getAttributeValueName(attributes, "BRAND")
       acc.brandModel.color =
-        acc.brandModel.color || _getAttributeValueName(attributes, "COLOR")
+        acc.brandModel.color || getAttributeValueName(attributes, "COLOR")
       acc.brandModel.model =
-        acc.brandModel.model || _getAttributeValueName(attributes, "MODEL")
+        acc.brandModel.model || getAttributeValueName(attributes, "MODEL")
 
       acc.domainId = curr.domain_id || acc.domainId
 
@@ -201,9 +201,6 @@ const _getMedalBooleans = (powerSellerStatus: string) => {
   const isMedalLider = powerSellerStatus == PowerSellerStatus.Silver
   return { isMedalPlatinum, isMedalGold, isMedalLider }
 }
-
-const _getAttributeValueName = (attributes, name) =>
-  attributes?.find((attr) => attr.id == name.toUpperCase())?.value_name ?? null
 
 const _getBestPosition = ({
   currentPosition,

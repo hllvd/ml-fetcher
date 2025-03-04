@@ -1,6 +1,5 @@
 import { MY_USER_ID } from "../../constants"
 import { Jobs } from "../../entities/sql/jobs.entity"
-import { saveCatalogToDb } from "../../services/persistence/product-catalog.persistence"
 
 export const fetchCatalogToDbWorker = async <T>(
   data: any[]

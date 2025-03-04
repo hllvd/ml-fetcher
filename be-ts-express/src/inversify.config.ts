@@ -15,8 +15,24 @@ import { ISellerApiClient } from "./models/interfaces/sellers/i-seller-api-clien
 import { ISellerConverter } from "./models/interfaces/sellers/i-seller-converter.interface"
 import { ISellerRepository } from "./models/interfaces/sellers/i-seller-repository.interface"
 import { ISellerService } from "./models/interfaces/sellers/i-seller-service.interface"
+import {
+  BrandRepository,
+  IBrandRepository,
+} from "./repository/brands.repository"
+import {
+  CatalogFieldsRepository,
+  ICatalogFieldsRepository,
+} from "./repository/catalog-fields.repository"
 import ProductRepository from "./repository/products.repository"
 import SellerRepository from "./repository/seller.repository"
+import {
+  IStateFieldsRepository,
+  StateFieldsRepository,
+} from "./repository/state-fields.repository"
+import {
+  IViewsRepository,
+  ViewsRepository,
+} from "./repository/views.repository"
 import { ProductApiClient } from "./services/ml/api/product-api-client.service"
 import { SellerApiClient } from "./services/ml/api/seller-api-client.service"
 import { ProductService } from "./services/ml/products.service"
@@ -40,6 +56,14 @@ container
   .bind<IProductService>(TYPES.ProductService)
   .to(ProductService)
   .inSingletonScope()
+container.bind<IBrandRepository>(TYPES.IBrandRepository).to(BrandRepository)
+container.bind<IViewsRepository>(TYPES.IViewsRepository).to(ViewsRepository)
+container
+  .bind<ICatalogFieldsRepository>(TYPES.ICatalogFieldsRepository)
+  .to(CatalogFieldsRepository)
+container
+  .bind<IStateFieldsRepository>(TYPES.IStateFieldsRepository)
+  .to(StateFieldsRepository)
 container.bind<ExampleController>(TYPES.ExampleController).to(ExampleController)
 container.bind<CatalogController>(TYPES.CatalogController).to(CatalogController)
 container

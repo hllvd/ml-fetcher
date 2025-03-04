@@ -74,29 +74,25 @@ export const queryHasVideo = (document) => {
   return !!clipIconHtml
 }
 
-export const queryStartsAmount = (document) => {
-  const starsAmount = document.querySelector(".ui-pdp-review__amount")
-    ? parseInt(
-        document.querySelector(".ui-pdp-review__amount")?.replace(/\D/g, "")
-      )
+export const queryStarsAmount = (document) => {
+  const selector = ".ui-pdp-review__amount"
+  const starsAmount = document.querySelector(selector)
+    ? parseInt(document.querySelector(selector)?.textContent.replace(/\D/g, ""))
     : null
   return starsAmount
 }
 
-export const queryStartsRating = (document) => {
-  const starsRating = document.querySelector(".ui-pdp-review__rating")
-    ?.textContent
-    ? Number.parseFloat(
-        document.querySelector(".ui-pdp-review__rating")?.textContent
-      )
+export const queryStarsRating = (document) => {
+  const selector = ".ui-pdp-review__rating"
+  const starsRating = document.querySelector(selector)?.textContent
+    ? Number.parseFloat(document.querySelector(selector)?.textContent)
     : null
   return starsRating
 }
 
 export const queryPowerSeller = (document) => {
-  const scrappedText = document.querySelector(
-    ".ui-seller-data-status__lider-seller > p"
-  )?.textContent
+  const selector = ".ui-seller-data-status__lider-seller > p"
+  const scrappedText = document.querySelector(selector)?.textContent
 
   switch (scrappedText) {
     case "MercadoLíder Platinum":

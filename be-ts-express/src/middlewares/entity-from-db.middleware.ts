@@ -1,6 +1,5 @@
 import { NextFunction, Response } from "express"
 import { RequestExtended } from "../models/extends/params/request-custom.model"
-import productsCatalogsRepository from "../repository/products-catalogs.repository"
 
 const entityFromDbMiddleware = async (
   req: RequestExtended,
@@ -13,14 +12,14 @@ const entityFromDbMiddleware = async (
 
   if (requestPath.includes("views")) return next() // Skip views endpoint
 
-  const productCatalogFromDb = await productsCatalogsRepository.get(productId)
-  const daysToExpire = 30
-  const expireDate: Date = productCatalogFromDb?.metadataUpdatedAt
-    ? new Date(productCatalogFromDb.metadataUpdatedAt)
-    : new Date("1988-05-02")
-  expireDate.setDate(expireDate.getDate() + daysToExpire)
-  expireDate > new Date()
-    ? res.status(200).json({ ...productCatalogFromDb })
-    : next()
+  // const productCatalogFromDb = await productsCatalogsRepository.get(productId)
+  // const daysToExpire = 30
+  // const expireDate: Date = productCatalogFromDb?.metadataUpdatedAt
+  //   ? new Date(productCatalogFromDb.metadataUpdatedAt)
+  //   : new Date("1988-05-02")
+  // expireDate.setDate(expireDate.getDate() + daysToExpire)
+  // expireDate > new Date()
+  //   ? res.status(200).json({ ...productCatalogFromDb })
+  //   : next()
 }
 export { entityFromDbMiddleware }
