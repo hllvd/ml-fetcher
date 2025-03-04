@@ -37,7 +37,7 @@ export default class ProductRepository implements IProductRepository {
       .leftJoinAndSelect("products.stateFields", "StateFields")
   }
 
-  async getByIds(productIds: string[]): Promise<ProductsCatalogs[]> {
+  public async getByIds(productIds: string[]): Promise<ProductsCatalogs[]> {
     const products = (await this._productQuery())
       .where("products.id IN (:...productIds)", { productIds })
       .getMany()
@@ -53,7 +53,7 @@ export default class ProductRepository implements IProductRepository {
 
   async upsert(productCatalog: ProductsCatalogs): Promise<ProductsCatalogs>
   async upsert(productCatalogs: ProductsCatalogs[]): Promise<ProductsCatalogs[]>
-  async upsert(
+  public async upsert(
     input: ProductsCatalogs | ProductsCatalogs[]
   ): Promise<ProductsCatalogs | ProductsCatalogs[]> {
     const products = Array.isArray(input) ? input : [input]
@@ -93,12 +93,10 @@ export default class ProductRepository implements IProductRepository {
       }
 
       if (productInfo?.views) {
-        console.log("views here")
         await this.viewsRepository.upsert(productInfo.views)
         catalog.views = productInfo?.views
       }
       if (productInfo?.catalogFields) {
-        console.log("================>", productInfo.catalogFields)
         await this.catalogFieldsRepository.upsert(productInfo.catalogFields)
         catalog.catalogFields = productInfo.catalogFields
       }
