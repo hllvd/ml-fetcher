@@ -23,15 +23,8 @@ export default class ProductRepository implements IProductRepository {
     this.productsRepository = this.dataSource.getRepository(ProductsCatalogs)
   }
 
-  async getByIds(productIds: string[]): Promise<ProductsCatalogs[]> {
-    const products = await this.productsRepository.findBy({
-      id: In(productIds),
-    })
-    return products
-  }
-
-  public async getById(productIds: string[]): Promise<ProductsCatalogs> {
-    const productsCatalogs = await this.productsRepository
+  private _productQuery = async () => {
+    return await this.productsRepository
       .createQueryBuilder("products")
       .leftJoinAndSelect("products.brandModel", "brandModel IS NOT NULL")
       .leftJoinAndSelect("products.seller", "seller IS NOT NULL")
@@ -42,7 +35,18 @@ export default class ProductRepository implements IProductRepository {
         "products.catalogFields IS NOT NULL"
       )
       .leftJoinAndSelect("products.stateFields", "StateFields")
-      .where("products.id = :productId", In(productIds))
+  }
+
+  async getByIds(productIds: string[]): Promise<ProductsCatalogs[]> {
+    const products = (await this._productQuery())
+      .where("products.id IN (:...productIds)", { productIds })
+      .getMany()
+    return products
+  }
+
+  public async getById(productId: string): Promise<ProductsCatalogs> {
+    const productsCatalogs = (await this._productQuery())
+      .where("products.id = :productId", { productId })
       .getOne()
     return productsCatalogs
   }
