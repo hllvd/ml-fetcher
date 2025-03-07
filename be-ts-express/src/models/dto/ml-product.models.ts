@@ -34,7 +34,7 @@ export interface MLProduct extends MLProductResponse {
   coverage_areas?: any[]
   tags?: string[]
   catalog_product_id?: string
-  date_created?: string
+  dateCreated?: string
   last_updated?: string
   owner?: boolean
   health?: number

@@ -113,7 +113,7 @@ export class ProductService implements IProductService {
     }
   }
 
-  private calculateCommissions(currentPrice: number): MLProductCommission {
+  public calculateCommissions(currentPrice: number): MLProductCommission {
     const fixedCommissionPrice = 0.12
     const fixedShipmentPrice = 22
     const maxPriceWithoutShipmentCommission = 79

@@ -1,4 +1,5 @@
 import { ML_OWN_USER_ID } from "../../../constants"
+import { ProductsCatalogs } from "../../../entities/sql/products-catalogs.entity"
 import { LogisticType } from "../../../models/api-response/ml/product-response.models"
 import { MLProduct } from "../../../models/dto/ml-product.models"
 import { PowerSellerStatus } from "../../../models/dto/ml-user.models"
@@ -7,33 +8,33 @@ import { roundNumber } from "../../../utils/math.util"
 import { getAttributeValueName, getEanIfExist } from "../../../utils/ml.utils"
 
 export const catalogReducer = (
-  catalog: Array<MLProduct>
+  catalog: Array<ProductsCatalogs>
 ): CatalogReducerResponse => {
   const catalogReducer = catalog.reduce(
     (acc, curr, i) => {
-      const { user, price, title } = curr
-      const isFull = curr.shipping?.logistic_type == LogisticType.full
-      const state = curr.seller_address?.state?.id
-      const currentDateCreated = new Date(curr.date_created)
-      const attributes = curr.attributes
-      delete curr.pictures
-      delete curr.attributes
+      const { seller, price, title } = curr
+      const isFull = curr.shippingLogisticType == LogisticType.full
+      const state = seller?.sellerAddressStateId
+      const currentDateCreated = new Date(curr.dateCreated)
+
       acc.title = title
       acc.permalink = acc.permalink || curr.permalink
       acc.thumbnail = acc.thumbnail || curr.thumbnail
-      acc.mlOwner = user?.id?.toString() === ML_OWN_USER_ID ? true : acc.mlOwner
-      acc.categoryId = acc.categoryId || curr.category_id
+      acc.mlOwner =
+        seller?.id?.toString() === ML_OWN_USER_ID ? true : acc.mlOwner
+      acc.categoryId = acc.categoryId || curr.category
 
-      acc.supermarketEligible =
-        curr?.tags && acc.supermarketEligible !== true
-          ? curr.tags.includes("supermarket_eligible")
-          : acc.supermarketEligible
+      acc.supermarketEligible = curr.supermarketEligible
+      // acc.supermarketEligible =
+      //   curr?.tags && acc.supermarketEligible !== true
+      //     ? curr.tags.includes("supermarket_eligible")
+      //     : acc.supermarketEligible
 
       const shipmentKey = _getShipmentKeyByLogisticType(
-        curr.shipping?.logistic_type as LogisticType
+        curr?.shippingLogisticType as LogisticType
       )
       const { isMedalPlatinum, isMedalGold, isMedalLider } = _getMedalBooleans(
-        user.seller_reputation?.power_seller_status
+        seller.sellerReputationPowerSellerStatus
       )
 
       acc.position.medalGold = _getBestPosition({
@@ -59,11 +60,11 @@ export const catalogReducer = (
       acc.position.officialStore = _getBestPosition({
         currentPosition: i,
         currentValue: acc.position.officialStore,
-        isType: curr.official_store_id != null,
+        isType: curr.officialStoreId != null,
       })
 
       const currentMedal = _getMedalKey(
-        user.seller_reputation?.power_seller_status
+        seller.sellerReputationPowerSellerStatus
       )
       acc.medalByState[currentMedal][state] =
         acc.medalByState[currentMedal][state] === undefined
@@ -106,21 +107,14 @@ export const catalogReducer = (
           ? currentDateCreated.toISOString()
           : acc.dateCreated
 
-      acc.brandModel.brand =
-        acc.brandModel.brand || getAttributeValueName(attributes, "BRAND")
-      acc.brandModel.color =
-        acc.brandModel.color || getAttributeValueName(attributes, "COLOR")
-      acc.brandModel.model =
-        acc.brandModel.model || getAttributeValueName(attributes, "MODEL")
-
-      acc.domainId = curr.domain_id || acc.domainId
+      acc.domainId = curr.domainId || acc.domainId
 
       acc.tagsGoodQualityThumbnail =
         acc.tagsGoodQualityThumbnail === null
-          ? curr.tags.includes("good_quality_thumbnail")
+          ? curr.tagsGoodQualityThumbnail
           : acc.tagsGoodQualityThumbnail
 
-      acc.ean = acc.ean === null ? getEanIfExist(attributes) : acc.ean
+      acc.ean = acc.ean === null ? curr.ean : acc.ean
       return acc
     },
     {

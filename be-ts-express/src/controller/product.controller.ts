@@ -13,7 +13,7 @@ import { getProductVisitsSummary } from "../services/ml/products-visits.service"
 @controller("/product")
 export class ProductController {
   constructor(
-    @inject(TYPES.ProductService)
+    @inject(TYPES.IProductService)
     private readonly productService: ProductService
   ) {}
   @httpGet("/")

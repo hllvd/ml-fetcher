@@ -35,6 +35,7 @@ import {
 } from "./repository/views.repository"
 import { ProductApiClient } from "./services/ml/api/product-api-client.service"
 import { SellerApiClient } from "./services/ml/api/seller-api-client.service"
+import { CatalogService } from "./services/ml/catalog.service"
 import { ProductService } from "./services/ml/products.service"
 import { SellerService } from "./services/ml/seller.service"
 import { TYPES } from "./types"
@@ -53,7 +54,7 @@ container
   .to(ProductRepository)
 container.bind<IProductApiClient>(TYPES.IProductApiClient).to(ProductApiClient)
 container
-  .bind<IProductService>(TYPES.ProductService)
+  .bind<IProductService>(TYPES.IProductService)
   .to(ProductService)
   .inSingletonScope()
 container.bind<IBrandRepository>(TYPES.IBrandRepository).to(BrandRepository)
@@ -64,6 +65,7 @@ container
 container
   .bind<IStateFieldsRepository>(TYPES.IStateFieldsRepository)
   .to(StateFieldsRepository)
+container.bind<CatalogService>(TYPES.ICatalogService).to(CatalogService)
 container.bind<ExampleController>(TYPES.ExampleController).to(ExampleController)
 container.bind<CatalogController>(TYPES.CatalogController).to(CatalogController)
 container

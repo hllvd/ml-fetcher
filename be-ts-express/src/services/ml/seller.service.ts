@@ -6,7 +6,6 @@ import { ISellerConverter } from "../../models/interfaces/sellers/i-seller-conve
 import { ISellerRepository } from "../../models/interfaces/sellers/i-seller-repository.interface"
 import { ISellerService } from "../../models/interfaces/sellers/i-seller-service.interface"
 import { TYPES } from "../../types"
-import { fetchSeller } from "./api/users"
 
 export class SellerService implements ISellerService {
   constructor(
@@ -16,45 +15,43 @@ export class SellerService implements ISellerService {
     @inject(TYPES.ISellerConverter) private sellerConverter: ISellerConverter
   ) {}
 
-  public async getSeller(sellerId: string): Promise<Seller> {
-    const sellerIdNumber = parseInt(sellerId)
+  public async getSeller({
+    userId,
+    sellerId,
+  }: {
+    userId: string
+    sellerId: number
+  }): Promise<Seller> {
+    const sellerIdNumber = sellerId
     let seller = await this.sellerRepository.getById(sellerIdNumber)
 
-    if (!seller) {
-      const apiResponse = await this.sellerApiClient.fetchSeller(sellerId)
+    if (seller == null || seller.nickname == null) {
+      const apiResponse = await this.sellerApiClient.fetchSeller({
+        userId,
+        sellerId: sellerId.toString(),
+      })
       seller = this.sellerConverter.convert(apiResponse)
       await this.sellerRepository.upsert(seller)
     }
 
     return seller
   }
-}
 
-const getProductSellers = async ({
-  products,
-  userId,
-}: {
-  products: Array<MLProduct>
-  userId: string
-}): Promise<MLProduct[]> => {
-  const productsWithSellers = await Promise.all(
-    products.map(async (c): Promise<any> => {
-      const user = await _getSeller({
-        userId,
-        sellerId: c.seller_id.toString(),
+  public populateProductsWithSeller = async ({
+    products,
+    userId,
+  }: {
+    products
+    userId: string
+  }): Promise<MLProduct[]> => {
+    console.log("populateProductsWithSeller", [...products])
+    const productsWithSellers = await Promise.all(
+      [...products].map(async (c): Promise<any> => {
+        const sellerId = Number.parseInt(c.seller?.id)
+        const user = await this.getSeller({ sellerId, userId })
+        return { ...c, user }
       })
-      return { ...c, user }
-    })
-  )
-  return productsWithSellers
+    )
+    return productsWithSellers
+  }
 }
-
-const _getSeller = async ({
-  userId,
-  sellerId,
-}: {
-  userId: string
-  sellerId: string
-}) => await fetchSeller({ userId, sellerId })
-
-export { getProductSellers }

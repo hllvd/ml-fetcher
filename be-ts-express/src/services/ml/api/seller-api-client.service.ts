@@ -5,10 +5,17 @@ import { fetchSeller } from "./users"
 export class SellerApiClient implements ISellerApiClient {
   private _userId: string
   constructor(userId: string) {
+    console.log("userId", userId)
     this._userId = userId
   }
-  async fetchSeller(sellerId: string): Promise<MLUser> {
-    const response = await fetchSeller({ userId: this._userId, sellerId })
+  public async fetchSeller({
+    sellerId,
+    userId,
+  }: {
+    sellerId: string
+    userId: string
+  }): Promise<MLUser> {
+    const response = await fetchSeller({ userId, sellerId })
     if (response) return response
     throw new Error(`Seller ${sellerId} not found`)
   }
